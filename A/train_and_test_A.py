@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 from keras.models import Sequential, Model
 from keras.layers import (Input, Dense, Dropout, Activation, GlobalAveragePooling2D, BatchNormalization, Flatten, Conv2D, MaxPooling2D)
 from keras.models import save_model, load_model
+from keras.optimizers import Adam
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -73,23 +74,31 @@ def visualize_images(images, labels, n_channels, length=20):
     plt.axis("off")
     plt.show()
 
-def plot_class_distribution(y_train):
-    classes, counts = np.unique(y_train, return_counts=True)
-    colors = ['blue', 'orange']  # You can choose any colors you like
-    plt.bar(classes, counts, color=colors)
-    plt.xlabel('Class')
-    plt.ylabel('Number of Images')
-    plt.xticks(classes, ['Normal', 'Pneumonia'])
-    plt.title('Distribution of Normal vs Pneumonia Images in Training Set')
+
+def plot_class_distribution(y_train, y_val, y_test):
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharey=True)
+
+    datasets = [y_train, y_val, y_test]
+    titles = ['Training Set', 'Validation Set', 'Test Set']
+    colors = [['blue', 'orange'], ['green', 'red'], ['purple', 'brown']]
+
+    for i, (dataset, title, color) in enumerate(zip(datasets, titles, colors)):
+        classes, counts = np.unique(dataset, return_counts=True)
+        axes[i].bar(classes, counts, color=color)
+        axes[i].set_xlabel('Class')
+        axes[i].set_ylabel('Number of Images')
+        axes[i].set_xticks(classes)
+        axes[i].set_xticklabels(['Normal', 'Pneumonia'])
+        axes[i].set_title(title)
+
+    plt.tight_layout()
     plt.show()
-
-
 
 
 def analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test, images, n_channels, length=20):
     ((x_train, y_train), (x_val, y_val), (x_test, y_test)) = load_data_pneumonia()
     # First, plot data distribution
-    plot_class_distribution(y_train)
+    plot_class_distribution(y_train, y_val, y_test)
 
     # Then, visualize sample images
     visualize_images(images, y_train, n_channels, length)
@@ -97,6 +106,7 @@ def analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test, i
 # Usage
 #((x_train, y_train), (x_val, y_val), (x_test, y_test)) = load_data_pneumonia()
 #analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test, x_train, n_channels=1, length=20)
+    
 
 
 
@@ -147,33 +157,36 @@ def pneumoniaLogRegrPredict(x_train, y_train, x_val, y_val, x_test, y_test):
 
 
 
-def train_and_save_cnn(x_train, y_train, x_val, y_val, x_test):
 
-    # converting to float32
+def preprocess_pneumoniamnist(x_train, x_val, x_test, y_train, y_test, y_val, num_classes):
+    # Convert to float32
     x_train = x_train.astype('float32')
     x_val = x_val.astype('float32')
     x_test = x_test.astype('float32')
 
-    # rescale value to [0 - 1] from [0 - 255]
-    x_train /= 255  # rescaling
-    x_test /= 255   
-    x_val /= 255    
+    # Rescale values to [0, 1]
+    x_train /= 255
+    x_val /= 255
+    x_test /= 255
 
-    x_train.shape+(1,)
-    np.expand_dims(x_train, axis=3).shape
+    # Expand dimensions
     x_train = np.expand_dims(x_train, axis=3)
-    print('x_train shape:',x_train.shape)
-    x_test = np.expand_dims(x_test, axis=3)
-    print('x_test shape:',x_test.shape)
     x_val = np.expand_dims(x_val, axis=3)
-    print('x_val shape:',x_val.shape)
-    num_classes = 2
+    x_test = np.expand_dims(x_test, axis=3)
 
-    
-    y_train_onehot = to_categorical(y_train)
-    y_test_onehot = to_categorical(y_test)
-    y_val_onehot = to_categorical(y_val)
+    # One-hot encode labels
+    y_train_onehot = to_categorical(y_train, num_classes)
+    y_val_onehot = to_categorical(y_val, num_classes)
+    y_test_onehot = to_categorical(y_test, num_classes)
 
+    return x_train, x_val, x_test, y_train_onehot, y_val_onehot, y_test_onehot
+
+
+def train_and_save_cnn(x_train, y_train, x_val, y_val, x_test, y_test):
+
+    x_train, x_val, x_test, y_train_onehot, y_val_onehot, y_test_onehot = preprocess_pneumoniamnist(x_train, x_val, x_test, y_train, y_test, y_val, num_classes=2)
+
+   
     print('y_train_onehot shape:', y_train_onehot.shape)
     print('y_test_onehot shape:', y_test_onehot.shape)
     print('y_val_onehot shape:', y_val_onehot.shape)
@@ -187,11 +200,12 @@ def train_and_save_cnn(x_train, y_train, x_val, y_val, x_test):
     x = Conv2D(64, (3, 3), activation='relu', padding='same', name='last_conv_layer')(x)
 
     x = GlobalAveragePooling2D(name='avg_pool')(x)
-    output = Dense(num_classes, activation='softmax', name='predictions')(x)
+    
+    output = Dense(units=2, activation='softmax', name='predictions')(x)
 
     model = Model(inputs=[input], outputs=[output])
     print(model.summary())
-    from keras.optimizers import Adam
+    
 
     batch_size = 256
     epochs = 20
@@ -211,7 +225,8 @@ def train_and_save_cnn(x_train, y_train, x_val, y_val, x_test):
 
 
 #((x_train, y_train), (x_val, y_val), (x_test, y_test))= load_data_pneumonia()
-#trained_model, history = train_and_save_cnn(x_train, y_train, x_val, y_val, x_test)
+#trained_model, history = train_and_save_cnn(x_train, y_train, x_val, y_val, x_test, y_test)
+
 
 
 def pneumoniaCNNPredict(x_test, y_test):
@@ -240,22 +255,24 @@ def pneumoniaCNNPredict(x_test, y_test):
 
     # Plot the confusion matrix
     plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, 
+                xticklabels=['Predicted Normal', 'Predicted Pneumonia'],
+                yticklabels=['True Normal', 'True Pneumonia'])
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
     plt.title('Confusion Matrix')
     plt.show()
 
     # Create a bar plot for accuracy and recall
     metrics = ['Accuracy', 'Recall']
     values = [accuracy, recall]
-    colours = ['blue', 'orange']
     plt.figure(figsize=(6, 4))
-    plt.bar(metrics, values, colour = colours)
+    plt.bar(metrics, values, color=['blue', 'orange'])
     plt.xlabel('Metrics')
     plt.ylabel('Values')
     plt.title('Model Evaluation Metrics')
     plt.show()
+
 
 
    
