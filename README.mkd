@@ -1,2 +1,28 @@
-packages
-numpy
+# Task A: PneumoniaMNIST Binary-classification task
+
+## Description
+This project focuses on analyzing the PneumoniaMNIST dataset using various machine learning techniques, including Logistic Regression, Support Vector Machines (SVM), and Convolutional Neural Networks (CNN). The project aims to automate the diagnosis of pneumonia from chest X-ray images.
+
+## File Structure
+- `load_data_pneumonia.py`: Contains the function to load the PneumoniaMNIST dataset.
+- `visualization.py`: Includes functions for visualizing images and class distributions in the dataset.
+- `logistic_regression.py`: Implements Logistic Regression for the dataset.
+- `svm_models.py`: Contains functions to train and evaluate SVM models with different kernels.
+- `svm_pca.py`: SVM models integrated with PCA for dimensionality reduction.
+- `cnn_model.py`: Defines, trains, and saves a CNN model for the dataset.
+- `evaluation_metrics.py`: Includes functions to plot ROC curves, confusion matrices, and training history.
+- `predict.py`: Functions to make predictions using trained Logistic Regression, SVM, and CNN models.
+- `main.py`: Main script to run the project, offering a menu to choose different models and tasks.
+
+## Packages Required
+- `numpy`: For numerical computations.
+- `matplotlib`: For plotting graphs and images.
+- `seaborn`: For advanced data visualization.
+- `keras`: For building and training neural network models.
+- `tensorflow`: Backend for Keras and general ML tasks.
+- `sklearn`: For machine learning models like SVM and Logistic Regression, preprocessing, and evaluation metrics.
+- `skimage`: For image processing tasks.
+
+## How to Run
+1. Ensure all required packages are installed.
+2. Run `main.py` to start the program and follow the on-screen prompts to select different analysis tasks.
