@@ -1,7 +1,9 @@
+
+
 # Task A: PneumoniaMNIST Binary-classification task
 
 ## Description
-This project focuses on analyzing the PneumoniaMNIST dataset using various machine learning techniques, including Logistic Regression, Support Vector Machines (SVM), and Convolutional Neural Networks (CNN). The project aims to automate the diagnosis of pneumonia from chest X-ray images.
+This project focuses on analyzing the PneumoniaMNIST dataset using various machine learning techniques, including Logistic Regression, Support Vector Machines (SVM), and Convolutional Neural Networks (CNN). The project aims to automate the diagnosis of pneumonia from chest X-ray images. 
 
 ## File Structure
 - `load_data_pneumonia.py`: Contains the function to load the PneumoniaMNIST dataset.
@@ -33,7 +35,7 @@ This project focuses on analyzing the PneumoniaMNIST dataset using various machi
 This project is dedicated to the analysis of the PathMNIST dataset, a collection of histopathological images, using various deep learning techniques. The primary focus is on building and evaluating a simplified version of the VGG network, both with and without data augmentation.
 
 ## File Structure
-- `data_loader.py`: Loads the PathMNIST dataset.
+- `load_data_pathmnist.py`: Loads the PathMNIST dataset.
 - `visualization.py`: Contains functions for visualizing class distributions and sample images from the dataset.
 - `vgg_model.py`: Defines the architecture for a simplified VGG network.
 - `training.py`: Includes functions to train the VGG model with and without data augmentation.
