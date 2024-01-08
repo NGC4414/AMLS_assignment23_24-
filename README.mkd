@@ -26,3 +26,39 @@ This project focuses on analyzing the PneumoniaMNIST dataset using various machi
 ## How to Run
 1. Ensure all required packages are installed.
 2. Run `main.py` to start the program and follow the on-screen prompts to select different analysis tasks.
+
+# Task B: PathMNIST Multi-classification task
+
+## Description
+This project is dedicated to the analysis of the PathMNIST dataset, a collection of histopathological images, using various deep learning techniques. The primary focus is on building and evaluating a simplified version of the VGG network, both with and without data augmentation.
+
+## File Structure
+- `data_loader.py`: Loads the PathMNIST dataset.
+- `visualization.py`: Contains functions for visualizing class distributions and sample images from the dataset.
+- `vgg_model.py`: Defines the architecture for a simplified VGG network.
+- `training.py`: Includes functions to train the VGG model with and without data augmentation.
+- `evaluation.py`: Functions for evaluating the trained models and visualizing the results.
+- `focal_loss.py`: Implements a custom focal loss function for model training.
+- `main.py`: Main script to run the project, allowing the user to select different tasks such as training or using pre-trained models.
+
+## Packages Required
+- `numpy`: For numerical computations.
+- `seaborn`: For advanced data visualization.
+- `matplotlib`: For plotting graphs and images.
+- `keras`: For building and training neural network models.
+- `tensorflow`: Backend for Keras and general ML tasks.
+- `sklearn`: For preprocessing and evaluation metrics.
+
+## How to Run
+1. Ensure all the required packages are installed.
+2. Run `main.py` to start the program.
+3. Follow the on-screen prompts to train new models or use pre-trained models for analyzing the PathMNIST dataset.
+
+## Tasks
+- Train a simplified VGG model without data augmentation.
+- Train a simplified VGG model with data augmentation.
+- Evaluate and visualize the performance of trained models.
+- Option to exit the program.
+
+Please note that training models require the `vgg_no_aug.h5` and `vgg_with_aug.h5` files to be present in the `B` directory for using pre-trained models.
+
