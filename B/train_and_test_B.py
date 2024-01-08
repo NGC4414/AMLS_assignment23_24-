@@ -1,20 +1,42 @@
-from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, GlobalAveragePooling2D, ReLU, Dropout
-import seaborn as sns
-import tensorflow as tf
+# from keras.preprocessing.image import ImageDataGenerator
+# from keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, GlobalAveragePooling2D, ReLU, Dropout, BatchNormalization
+# import seaborn as sns
+# import tensorflow as tf
+# import numpy as np
+# from keras.utils import to_categorical
+# from sklearn.metrics import confusion_matrix
+# import matplotlib.pyplot as plt
+# from keras.preprocessing.image import ImageDataGenerator
+# from keras.models import Sequential, Model
+# from keras.optimizers import SGD
+# from keras.losses import CategoricalCrossentropy
+# from keras.callbacks import EarlyStopping, ModelCheckpoint
+# from keras.models import load_model
+# from keras.optimizers import Adam
+# from keras.regularizers import l2
+# from sklearn.metrics import precision_score, recall_score, classification_report
+
+# Data processing and visualization
 import numpy as np
-from keras.utils import to_categorical
-from sklearn.metrics import confusion_matrix
+import seaborn as sns
 import matplotlib.pyplot as plt
+
+# Keras for model building
+from keras.models import Sequential, Model, load_model
+from keras.layers import (Input, Conv2D, MaxPooling2D, Flatten, Dense, 
+                          GlobalAveragePooling2D, ReLU, Dropout, BatchNormalization)
 from keras.preprocessing.image import ImageDataGenerator
-from keras.models import Sequential, Model
-from keras.optimizers import SGD
-from keras.losses import CategoricalCrossentropy
+from keras.utils import to_categorical
 from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.models import load_model
-from keras.optimizers import Adam
+
+# Optimizers and loss functions
+from keras.optimizers import SGD, Adam
+from keras.losses import CategoricalCrossentropy
 from keras.regularizers import l2
-from sklearn.metrics import precision_score, recall_score, classification_report
+
+# Metrics and TensorFlow
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, classification_report
+import tensorflow as tf
 
 def load_data_pathmnist():
     path = r"Datasets\pathmnist.npz"
@@ -95,53 +117,68 @@ def preprocess_data(x_train, y_train, x_val, y_val):
     x_val = x_val.astype('float32') / 255
 
     # Convert labels to one-hot encoding
-    y_train = to_categorical(y_train, num_classes=9)
-    y_val = to_categorical(y_val, num_classes=9)
+    y_train_onehot = to_categorical(y_train, num_classes=9)
+    y_val_onehot = to_categorical(y_val, num_classes=9)
 
-    return x_train, y_train, x_val, y_val, 
 
-def create_cnn(input_shape, hidden_units, output_shape):
+    return x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot
 
-    input_layer = Input(shape=x_train.shape[1:])
-    x = Conv2D(32, (3, 3), activation='relu', padding='same')(input_layer)
-    x = Conv2D(32, (3, 3), activation='relu', padding='same')(x)
-    x = MaxPooling2D(pool_size=(2, 2))(x)
-    x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
-    x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
-    x = GlobalAveragePooling2D()(x)
-    output_layer = Dense(9, activation='softmax')(x)  
 
-    model = Model(inputs=[input_layer], outputs=[output_layer])
-    return model
 
 ####VGG model
 
+# def create_vgg(input_shape, hidden_units, output_shape):
+#     model = Sequential()
+    
+#     # Conv Block 1
+#     model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same', input_shape=input_shape))
+#     model.add(ReLU())
+#     model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
+#     model.add(ReLU())
+#     model.add(MaxPooling2D(pool_size=2))
+    
+#     # Conv Block 2
+#     model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
+#     model.add(ReLU())
+#     model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
+#     model.add(ReLU())
+#     model.add(MaxPooling2D(pool_size=2))
+
+#     # Classifier
+#     model.add(Flatten())
+#     model.add(Dense(output_shape, activation='softmax'))
+
+#     return model
+
 def create_vgg(input_shape, hidden_units, output_shape):
     model = Sequential()
-    
+
     # Conv Block 1
-    model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same', input_shape=input_shape))
+    model.add(Conv2D(32, kernel_size=3, strides=1, padding='same', input_shape=input_shape))
     model.add(ReLU())
-    model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
-    model.add(ReLU())
-    model.add(MaxPooling2D(pool_size=2))
+    model.add(Conv2D(32, kernel_size=3, strides=1, padding='same'))
     
-    # Conv Block 2
-    model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
-    model.add(ReLU())
-    model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
     model.add(ReLU())
     model.add(MaxPooling2D(pool_size=2))
 
+    # Conv Block 2
+    model.add(Conv2D(128, kernel_size=3, strides=1, padding='same'))
+    model.add(ReLU())
+    model.add(Conv2D(128, kernel_size=3, strides=1, padding='same'))
+    model.add(ReLU())
+    model.add(MaxPooling2D(pool_size=2))
+    model.add(Dropout(0.25))
+
     # Classifier
     model.add(Flatten())
+    #model.add(Dense(128, activation='relu'))
     model.add(Dense(output_shape, activation='softmax'))
 
     return model
 
 
-def train_model(model, x_train, y_train, x_val, y_val, learning_rate=0.0001, momentum=0.9, epochs=50, batch_size=256, patience=5, model_path='./tinyvgg.h5'):
-    x_train, y_train, x_val, y_val = preprocess_data(x_train, y_train, x_val, y_val)
+def train_model_vgg(model, x_train, y_train, x_val, y_val, learning_rate=0.0001, momentum=0.9, epochs=50, batch_size=256, patience=5, model_path='B/vgg_no_aug.h5'):
+    x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
     # Compile the model
     model.compile(optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
                   loss=CategoricalCrossentropy(from_logits=False),
@@ -153,23 +190,22 @@ def train_model(model, x_train, y_train, x_val, y_val, learning_rate=0.0001, mom
     callbacks_list = [model_checkpoint, early_stopping]
 
     # Training the model
-    history = model.fit(x_train, y_train,
+    history = model.fit(x_train, y_train_onehot,
                         epochs=epochs,
                         batch_size=batch_size,
-                        validation_data=(x_val, y_val),
+                        validation_data=(x_val, y_val_onehot),
                         callbacks=callbacks_list)
   
-    
     return history
 
 from keras.preprocessing.image import ImageDataGenerator
 
-def train_model_with_augmentation(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='./tinyvgg.h5'):
-    x_train, y_train, x_val, y_val = preprocess_data(x_train, y_train, x_val, y_val)
+def train_model_vgg_with_augmentation(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='B/vgg_with_aug.h5'):
+    x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
 
     # Define the data augmentation
     train_datagen = ImageDataGenerator(
-        rotation_range=20,
+        rotation_range=10,
         width_shift_range=0.2,
         height_shift_range=0.2,
         shear_range=0.2,
@@ -179,7 +215,7 @@ def train_model_with_augmentation(model, x_train, y_train, x_val, y_val, learnin
     )
 
     # Create a training data generator
-    train_generator = train_datagen.flow(x_train, y_train, batch_size=batch_size)
+    train_generator = train_datagen.flow(x_train, y_train_onehot, batch_size=batch_size)
 
     # Compile the model
     model.compile(optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
@@ -196,7 +232,7 @@ def train_model_with_augmentation(model, x_train, y_train, x_val, y_val, learnin
         train_generator,
         epochs=epochs,
         steps_per_epoch=len(x_train) // batch_size,  # Number of steps per epoch
-        validation_data=(x_val, y_val),
+        validation_data=(x_val, y_val_onehot),
         callbacks=callbacks_list
     )
     
@@ -263,7 +299,6 @@ def plot_training_history(history):
     plt.legend()
     plt.title('Accuracy Over Epochs')
     plt.show()
-
 
 
 def evaluate_and_visualize_model(model_path, x_test, y_test):

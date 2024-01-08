@@ -1,8 +1,8 @@
 import os
 import sys
-from B.train_and_test_B import ( create_vgg, evaluate_and_visualize_model, 
+from B.train_and_test_B import (create_vgg, evaluate_and_visualize_model, 
                                 load_data_pathmnist, plot_class_distribution_pathmnist, 
-                                show_sample_images, train_model, plot_training_history, train_model_with_augmentation)
+                                show_sample_images, plot_training_history, train_model_vgg, train_model_vgg_with_augmentation)
 
 
 # Define a dictionary that maps class labels to their names
@@ -21,10 +21,10 @@ class_label_names = {
 
 def print_menu_B():
     print("Select models for Task B:")
-    print("1. Train TinyVGG without Data Augmentation")
-    print("2. Train TinyVGG with Data Augmentation")
-    print("3. Use Pre-Trained TinyVGG without Data Augmentation")
-    print("4. Use Pre-Trained TinyVGG with Data Augmentation")
+    print("1. Train simplified VGG without Data Augmentation")
+    print("2. Train simplified VGG with Data Augmentation")
+    print("3. Use Pre-Trained simplified VGG without Data Augmentation")
+    print("4. Use Pre-Trained simplified VGG with Data Augmentation")
     print("5. Exit program")
 
 def run_task_B():                               
@@ -48,32 +48,32 @@ def run_task_B():
 
             if option == 1:
                 # Train without data augmentation
-                history = train_model(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='./tinyvgg_no_aug.h5')
+                history = train_model_vgg(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=256, patience=5, model_path='B/vgg_no_aug.h5')
             else:
                 # Train with data augmentation
-                history = train_model_with_augmentation(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='./tinyvgg_with_aug.h5')
+                history = train_model_vgg_with_augmentation(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=256, patience=5, model_path='B/vgg_with_aug.h5')
 
             plot_training_history(history)
             if option == 1:
-                evaluate_and_visualize_model('./tinyvgg_no_aug.h5', x_test, y_test)
+                evaluate_and_visualize_model('B/vgg_no_aug.h5', x_test, y_test)
             else:
-                evaluate_and_visualize_model('./tinyvgg_with_aug.h5', x_test, y_test)
+                evaluate_and_visualize_model('B/vgg_with_aug.h5', x_test, y_test)
 
         elif option == 3:
-            # Use pre-trained TinyVGG without data augmentation
-            if os.path.exists('./tinyvgg_no_aug.h5'):
+            # Use pre-trained VGG without data augmentation
+            if os.path.exists('B/vgg_no_aug.h5'):
                 plot_class_distribution_pathmnist(y_train, y_val, y_test)
                 show_sample_images(x_train, y_train, class_label_names)
-                evaluate_and_visualize_model('./tinyvgg_no_aug.h5', x_test, y_test)
+                evaluate_and_visualize_model('B/vgg_no_aug.h5', x_test, y_test)
             else:
                 print("Pre-trained model without data augmentation not found. Please train a model first.")
 
         elif option == 4:
-            # Use pre-trained TinyVGG with data augmentation
-            if os.path.exists('./tinyvgg_with_aug.h5'):
+            # Use pre-trained VGG with data augmentation
+            if os.path.exists('B/vgg_with_aug.h5'):
                 plot_class_distribution_pathmnist(y_train, y_val, y_test)
                 show_sample_images(x_train, y_train, class_label_names)
-                evaluate_and_visualize_model('./tinyvgg_with_aug.h5', x_test, y_test)
+                evaluate_and_visualize_model('B/vgg_with_aug.h5', x_test, y_test)
             else:
                 print("Pre-trained model with data augmentation not found. Please train a model first.")
 
