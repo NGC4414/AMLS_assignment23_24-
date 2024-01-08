@@ -1,5 +1,5 @@
 from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, GlobalAveragePooling2D, ReLU, Dropout
+from keras.layers import Input, Conv2D, MaxPooling2D, Flatten, Dense, GlobalAveragePooling2D, ReLU, Dropout
 import seaborn as sns
 import tensorflow as tf
 import numpy as np
@@ -12,10 +12,9 @@ from keras.optimizers import SGD
 from keras.losses import CategoricalCrossentropy
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import load_model
-from keras.applications import EfficientNetB0
 from keras.optimizers import Adam
 from keras.regularizers import l2
-
+from sklearn.metrics import precision_score, recall_score, classification_report
 
 def load_data_pathmnist():
     path = r"Datasets\pathmnist.npz"
@@ -31,7 +30,7 @@ def load_data_pathmnist():
 
 ((x_train, y_train), (x_val, y_val), (x_test, y_test)) = load_data_pathmnist()
 
-# Define a dictionary that maps class labels to their names
+# Dictionary that maps class labels to their names
 class_label_names = {
     '0': 'adipose',
     '1': 'background',
@@ -44,8 +43,7 @@ class_label_names = {
     '8': 'colorectal adenocarcinoma epithelium'
 }
 
-# Function to print class label descriptions - this function is called in plot_class_distribution_pathmnist(y_train, y_val, y_test)
-# to provide more information about the names of each class
+# Function to print class label descriptions 
 def print_class_label_descriptions(class_label_names):
     print("Class Label Descriptions:")
     for label, name in class_label_names.items():
@@ -89,7 +87,7 @@ def show_sample_images(x_data, y_data, class_label_names, num_samples_per_class=
     plt.tight_layout()
     plt.show()
 
-############################################VGG#############################################################################################
+############################################VGG#####################################################
 
 def preprocess_data(x_train, y_train, x_val, y_val):
     # Normalize images
@@ -102,8 +100,23 @@ def preprocess_data(x_train, y_train, x_val, y_val):
 
     return x_train, y_train, x_val, y_val, 
 
-    
-def create_tinyvgg(input_shape, hidden_units, output_shape):
+def create_cnn(input_shape, hidden_units, output_shape):
+
+    input_layer = Input(shape=x_train.shape[1:])
+    x = Conv2D(32, (3, 3), activation='relu', padding='same')(input_layer)
+    x = Conv2D(32, (3, 3), activation='relu', padding='same')(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+    x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+    x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+    x = GlobalAveragePooling2D()(x)
+    output_layer = Dense(9, activation='softmax')(x)  
+
+    model = Model(inputs=[input_layer], outputs=[output_layer])
+    return model
+
+####VGG model
+
+def create_vgg(input_shape, hidden_units, output_shape):
     model = Sequential()
     
     # Conv Block 1
@@ -127,12 +140,97 @@ def create_tinyvgg(input_shape, hidden_units, output_shape):
     return model
 
 
-
-def train_model(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='./tinyvgg.h5'):
+def train_model(model, x_train, y_train, x_val, y_val, learning_rate=0.0001, momentum=0.9, epochs=50, batch_size=256, patience=5, model_path='./tinyvgg.h5'):
     x_train, y_train, x_val, y_val = preprocess_data(x_train, y_train, x_val, y_val)
     # Compile the model
     model.compile(optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
                   loss=CategoricalCrossentropy(from_logits=False),
+                  metrics=['accuracy'])
+
+    # Callbacks
+    early_stopping = EarlyStopping(monitor='val_loss', patience=patience, restore_best_weights=True)
+    model_checkpoint = ModelCheckpoint(filepath=model_path, save_best_only=True, monitor='val_loss', mode='min')
+    callbacks_list = [model_checkpoint, early_stopping]
+
+    # Training the model
+    history = model.fit(x_train, y_train,
+                        epochs=epochs,
+                        batch_size=batch_size,
+                        validation_data=(x_val, y_val),
+                        callbacks=callbacks_list)
+  
+    
+    return history
+
+from keras.preprocessing.image import ImageDataGenerator
+
+def train_model_with_augmentation(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='./tinyvgg.h5'):
+    x_train, y_train, x_val, y_val = preprocess_data(x_train, y_train, x_val, y_val)
+
+    # Define the data augmentation
+    train_datagen = ImageDataGenerator(
+        rotation_range=20,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True,
+        fill_mode='nearest'
+    )
+
+    # Create a training data generator
+    train_generator = train_datagen.flow(x_train, y_train, batch_size=batch_size)
+
+    # Compile the model
+    model.compile(optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
+                  loss=CategoricalCrossentropy(from_logits=False),
+                  metrics=['accuracy'])
+
+    # Callbacks
+    early_stopping = EarlyStopping(monitor='val_loss', patience=patience, restore_best_weights=True)
+    model_checkpoint = ModelCheckpoint(filepath=model_path, save_best_only=True, monitor='val_loss', mode='min')
+    callbacks_list = [model_checkpoint, early_stopping]
+
+    # Training the model
+    history = model.fit(
+        train_generator,
+        epochs=epochs,
+        steps_per_epoch=len(x_train) // batch_size,  # Number of steps per epoch
+        validation_data=(x_val, y_val),
+        callbacks=callbacks_list
+    )
+    
+    return history
+
+####Focal Loss
+def focal_loss(gamma=2., alpha=4.):
+    gamma = float(gamma)
+    alpha = float(alpha)
+    def focal_loss_fixed(y_true, y_pred):
+        """Focal loss for multi-classification
+        FL(p_t)=-alpha*(1-p_t)^gamma*log(p_t)
+        """
+        epsilon = 1.e-9
+        y_true = tf.convert_to_tensor(y_true, tf.float32)
+        y_pred = tf.clip_by_value(y_pred, epsilon, 1. - epsilon)
+        
+        # Calculate cross entropy
+        cross_entropy = -y_true * tf.math.log(y_pred)
+        weight = alpha * y_true * tf.math.pow((1 - y_pred), gamma)
+        
+        # Calculate focal loss
+        loss = weight * cross_entropy
+        
+        # Sum the losses in mini_batch
+        loss = tf.reduce_sum(loss, axis=1)
+        return tf.reduce_mean(loss)
+    return focal_loss_fixed
+
+def train_model(model, x_train, y_train, x_val, y_val, learning_rate=0.0001, momentum=0.9, epochs=50, batch_size=256, patience=5, model_path='./tinyvgg.h5'):
+    x_train, y_train, x_val, y_val = preprocess_data(x_train, y_train, x_val, y_val)
+    custom_focal_loss = focal_loss(gamma=2., alpha=4.)
+    model.compile(optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
+                  loss=custom_focal_loss,
                   metrics=['accuracy'])
 
     # Callbacks
@@ -166,19 +264,21 @@ def plot_training_history(history):
     plt.title('Accuracy Over Epochs')
     plt.show()
 
+
+
 def evaluate_and_visualize_model(model_path, x_test, y_test):
     x_test = x_test.astype('float32') / 255
-    y_test = to_categorical(y_test, num_classes=9)
+    y_test_one_hot = to_categorical(y_test, num_classes=9)  # One-hot encode y_test for model evaluation
     model = load_model(model_path)
 
     # Evaluate the model on test data
-    loss, accuracy = model.evaluate(x_test, y_test)
+    loss, accuracy = model.evaluate(x_test, y_test_one_hot)
     print(f'Test Loss: {loss:.2f}, Test Accuracy: {accuracy * 100:.2f}%')
 
     # Make predictions
     predictions = model.predict(x_test)
     predicted_classes = np.argmax(predictions, axis=1)
-    true_classes = np.argmax(y_test, axis=1)
+    true_classes = y_test  # Using non-one-hot encoded y_test for classification report
 
     # Compute and plot the confusion matrix
     cm = confusion_matrix(true_classes, predicted_classes)
@@ -188,109 +288,30 @@ def evaluate_and_visualize_model(model_path, x_test, y_test):
     plt.ylabel('True Labels')
     plt.xlabel('Predicted Labels')
     plt.show()
-################################################################################################################################################
-def preprocess_data_eff(x_train, y_train, x_val, y_val, target_size=(224, 224)):
-    x_train = tf.convert_to_tensor(x_train)
-    x_val = tf.convert_to_tensor(x_val)
-    
-    # Resize images
-    x_train_resized = tf.image.resize(x_train, target_size)
-    x_val_resized = tf.image.resize(x_val, target_size)
 
-    # Normalize images
-    x_train_normalized = x_train_resized / 255.0
-    x_val_normalized = x_val_resized / 255.0
+    # Calculate precision and recall
+    precision = precision_score(true_classes, predicted_classes, average='macro')
+    recall = recall_score(true_classes, predicted_classes, average='macro')
 
-    # Convert labels to one-hot encoding
-    y_train_encoded = to_categorical(y_train, num_classes=9)
-    y_val_encoded = to_categorical(y_val, num_classes=9)
+    # Print accuracy, precision, and recall
+    print(f"Accuracy: {accuracy:.2f}")
+    print(f"Precision: {precision:.2f}")
+    print(f"Recall: {recall:.2f}")
 
-    return x_train_normalized, y_train_encoded, x_val_normalized, y_val_encoded
+    # Print classification report
+    print("\nClassification Report:\n")
+    print(classification_report(true_classes, predicted_classes, target_names=class_label_names.values()))
 
-def image_transformation(x_train, y_train, num_classes=9, batch_size=128):
-    # Define the ImageDataGenerator with augmentation for training data
-    train_datagen = ImageDataGenerator(
-        rotation_range=20,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
-        horizontal_flip=True,
-        fill_mode='nearest'
-    )
-    train_generator = train_datagen.flow(x_train, y_train, batch_size=batch_size)
-    return train_generator
-
-def create_efficientnetb0(n_classes, l2_reg=0.001):
-    # Load EfficientNetB0 with pre-trained ImageNet weights
-    base_model = EfficientNetB0(include_top=False, input_shape=(224, 224, 3), weights='imagenet')
-
-    # Add custom layers
-    x = GlobalAveragePooling2D()(base_model.output)
-    x = Dropout(0.5)(x)  # Dropout for regularization
-    output = Dense(n_classes, activation='softmax', kernel_regularizer=l2(l2_reg))(x)  # Final Dense layer for classification
-
-    # Create the model
-    model = Model(inputs=base_model.input, outputs=output)
-
-    return model
-
-
-def train_efficientnetb0(model, train_generator, x_val, y_val, learning_rate=0.001, epochs=5, batch_size=32, patience=5, model_path='./efficientnetb0_model.h5'):
-    # Compile the model
-    model.compile(optimizer=Adam(learning_rate=learning_rate), loss=CategoricalCrossentropy(), metrics=['accuracy'])
-
-    # Callbacks for early stopping and model checkpointing
-    early_stopping = EarlyStopping(monitor='val_loss', patience=patience, restore_best_weights=True)
-    model_checkpoint = ModelCheckpoint(filepath=model_path, save_best_only=True, monitor='val_loss', mode='min')
-
-    # Training the model
-    history = model.fit(
-        train_generator,
-        epochs=epochs,
-        steps_per_epoch=len(train_generator),
-        validation_data=(x_val, y_val),
-        callbacks=[early_stopping, model_checkpoint]
-    )
-
-    return history
-
-
-def plot_training_history_efficientnet(history):
-    plt.figure(figsize=(12, 4))
-    plt.subplot(1, 2, 1)
-    plt.plot(history.history['loss'], label='Train Loss')
-    plt.plot(history.history['val_loss'], label='Validation Loss')
-    plt.title('Loss Over Epochs')
-    plt.legend()
-    plt.subplot(1, 2, 2)
-    plt.plot(history.history['accuracy'], label='Train Accuracy')
-    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-    plt.title('Accuracy Over Epochs')
-    plt.legend()
+    # Bar plot for accuracy, precision, and recall
+    metrics = ['Accuracy', 'Precision', 'Recall']
+    values = [accuracy, precision, recall]
+    colors = ['blue', 'green', 'orange']
+    plt.figure(figsize=(8, 5))
+    plt.bar(metrics, values, color=colors)
+    plt.xlabel('Metrics')
+    plt.ylabel('Values')
+    plt.title('Model Evaluation Metrics')
+    plt.ylim(0, 1)
     plt.show()
 
-def evaluate_and_visualize_efficientnet(model_path, x_test, y_test):
-    # Resize test images to match the input shape expected by the model
-    x_test_resized = tf.image.resize(x_test, (224, 224))
-    x_test_resized = x_test_resized / 255.0
-    y_test_encoded = to_categorical(y_test, num_classes=9)
 
-    # Load the trained model
-    model = load_model(model_path)
-
-    # Evaluate the model on resized test data
-    loss, accuracy = model.evaluate(x_test_resized, y_test_encoded)
-    print(f'Test Loss: {loss:.2f}, Test Accuracy: {accuracy * 100:.2f}%')
-
-    # Make predictions
-    predictions = model.predict(x_test_resized)
-    predicted_classes = np.argmax(predictions, axis=1)
-    true_classes = np.argmax(y_test_encoded, axis=1)
-
-    # Compute and plot the confusion matrix
-    cm = confusion_matrix(true_classes, predicted_classes)
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-    plt.title('Confusion Matrix')
-    plt.ylabel('True Labels')
-    plt.xlabel('Predicted Labels')
-    plt.show()
