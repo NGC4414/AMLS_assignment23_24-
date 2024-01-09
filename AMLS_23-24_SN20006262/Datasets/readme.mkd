@@ -1,4 +1,4 @@
-This folder should be filled with the PneumoniaMNIST and PathMNIST dataset .npz files, which will be unpacked in the codes in fooders A and B.
+This folder should be filled with the PneumoniaMNIST and PathMNIST dataset .npz files, which will be unpacked in the codes in folders A and B.
 
 
 I downloaded the .npz files from the Zenodo website: https://zenodo.org/records/6496656
