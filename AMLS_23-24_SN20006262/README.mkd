@@ -16,22 +16,9 @@ This file is the main executing file. The file imports the sys library to work w
 ## Description
 This folder contains the files for task A. It contains the following files:
 - `train_and_test_A.py`: file that contains the functions used to load the data, train and test the models.
-- `task.py`: file used to execute the code
+- `task_A.py`: file used to execute train_and_test_A.py
 - `pretrained_model.h5`: pretrained CNN model
 - `__init__.py` : empty file which helps when using relative paths as this code needs to be run in different computers
-  
-## train_and_test_A.py
-- `load_data_pneumonia()`: function to load and extract the PneumoniaMNIST dataset from the .npz file.
-
-- 
-- `visualization.py`: Includes functions for visualizing images and class distributions in the dataset.
-- `logistic_regression.py`: Implements Logistic Regression for the dataset.
-- `svm_models.py`: Contains functions to train and evaluate SVM models with different kernels.
-- `svm_pca.py`: SVM models integrated with PCA for dimensionality reduction.
-- `cnn_model.py`: Defines, trains, and saves a CNN model for the dataset.
-- `evaluation_metrics.py`: Includes functions to plot ROC curves, confusion matrices, and training history.
-- `predict.py`: Functions to make predictions using trained Logistic Regression, SVM, and CNN models.
-- `main.py`: Main script to run the project, offering a menu to choose different models and tasks.
 
 ## Packages Required
 - `numpy`: For numerical computations.
@@ -42,19 +29,21 @@ This folder contains the files for task A. It contains the following files:
 - `sklearn`: For machine learning models like SVM and Logistic Regression, preprocessing, and evaluation metrics.
 - `skimage`: For image processing tasks.
 
-# Task B: PathMNIST Multi-classification task
+- ## Menu
+1. Train a simplified VGG model without data augmentation.
+2. Train a simplified VGG model with data augmentation.
+3. Use Pre-trained VGG model without data augmentation.
+4. Use Pre-trained VGG model with data augmentation.
+5. Option to exit the program.
 
+# Folder B: PathMNIST Multi-classification task
 ## Description
-This project is dedicated to the analysis of the PathMNIST dataset, a collection of histopathological images, using various deep learning techniques. The primary focus is on building and evaluating a simplified version of the VGG network, both with and without data augmentation.
-
-## File Structure
-- `load_data_pathmnist.py`: Loads the PathMNIST dataset.
-- `visualization.py`: Contains functions for visualizing class distributions and sample images from the dataset.
-- `vgg_model.py`: Defines the architecture for a simplified VGG network.
-- `training.py`: Includes functions to train the VGG model with and without data augmentation.
-- `evaluation.py`: Functions for evaluating the trained models and visualizing the results.
-- `focal_loss.py`: Implements a custom focal loss function for model training.
-- `main.py`: Main script to run the project, allowing the user to select different tasks such as training or using pre-trained models.
+This folder contains the files for task A. It contains the following files:
+- `train_and_test_B.py`: file that contains the functions used to load the data, train and test the models.
+- `task_B.py`: file used to execute train_and_test_B.py
+- `vgg_no_aug.h5`: pretrained VGG model
+- `vgg_with_aug.h5`: pretrained VGG model
+- `__init__.py` : empty file which helps when using relative paths as this code needs to be run in different computers
 
 ## Packages Required
 - `numpy`: For numerical computations.
