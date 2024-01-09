@@ -5,15 +5,16 @@ The code is organized as follows:
 -`AMLS_23-24_SN20006262 folder` : contains all the code.
   - `Folder A` : contains the code to execute task A
   - `Folder B` : contains the code to execute task B
-  - `Datasets`: empty (should be filled with PathMNIST.npz and PneumoniaMNIST.npz files)
+  - `Datasets`: this folder is basically empty (should be filled with PathMNIST.npz and PneumoniaMNIST.npz files), however it contains a readme file to explain how to use the Datasets folder. 
   - `main.py`: file that handles teh execution of the code
   - `README.mkd`: this file.
-
-    
+   
 
 # Folder A: PneumoniaMNIST Binary-classification task
 ## Description
-This project focuses on analyzing the PneumoniaMNIST dataset using various machine learning techniques, including Logistic Regression, Support Vector Machines (SVM), and Convolutional Neural Networks (CNN). The project aims to automate the diagnosis of pneumonia from chest X-ray images. 
+This folder contains the files for task A. It contains the following files:
+- `train_and_test_A.py`: file that contains the functions used to load the data, train and test the models.
+- `task.py`: file used to execute the code
 
 ## File Structure
 - `load_data_pneumonia.py`: Contains the function to load the PneumoniaMNIST dataset.
