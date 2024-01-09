@@ -1,4 +1,13 @@
-This Github page contains the code for the 2023-2024 AMLS assignment. 
+This Github page contains the code for the 2023-2024 AMLS assignment. The assignment requres to classify two medical images datasets, PneumoniaMNIST (binary classification) and PathMNIST(multi-class classification).
+
+The code is organized as follows:
+-`AMLS_23-24_SN20006262`
+  - `Folder A` : contains the code to execute task A
+  - `Folder B` : contains the code to execute task B
+  - `Datasets`: empty (should be filled with PathMNIST.npz and PneumoniaMNIST.npz files)
+  - `main.py`: file that handles teh execution of the code
+  - `README.mkd`: this file.
+
 
 # Task A: PneumoniaMNIST Binary-classification task
 
