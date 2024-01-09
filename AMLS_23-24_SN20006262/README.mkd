@@ -1,16 +1,17 @@
 This Github page contains the code for the 2023-2024 AMLS assignment. The assignment requres to classify two medical images datasets, PneumoniaMNIST (binary classification) and PathMNIST(multi-class classification).
 
 The code is organized as follows:
--`AMLS_23-24_SN20006262`
+
+-`AMLS_23-24_SN20006262 folder` : contains all the code.
   - `Folder A` : contains the code to execute task A
   - `Folder B` : contains the code to execute task B
   - `Datasets`: empty (should be filled with PathMNIST.npz and PneumoniaMNIST.npz files)
   - `main.py`: file that handles teh execution of the code
   - `README.mkd`: this file.
 
+    
 
-# Task A: PneumoniaMNIST Binary-classification task
-
+# Folder A: PneumoniaMNIST Binary-classification task
 ## Description
 This project focuses on analyzing the PneumoniaMNIST dataset using various machine learning techniques, including Logistic Regression, Support Vector Machines (SVM), and Convolutional Neural Networks (CNN). The project aims to automate the diagnosis of pneumonia from chest X-ray images. 
 
