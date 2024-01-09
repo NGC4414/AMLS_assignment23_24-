@@ -66,5 +66,5 @@ This folder contains the files for task A. It contains the following files:
 3. Follow the on-screen prompts to eather use pre-trained models or train th models on your own machine for analyzing the PneumoniaMNIST and PathMNIST dataset.
 
 
-Please note that training models require the `vgg_no_aug.h5` and `vgg_with_aug.h5` files to be present in the `B` directory for using pre-trained models.
+Please note that training models require the `vgg_no_aug.h5` and `vgg_with_aug.h5` files to be present in the `B` directory and the `pretrained_model.h5` file to be present in the `A` for using pre-trained models.
 
