@@ -1,4 +1,4 @@
-
+This Github page contains the code for the 2023-2024 AMLS assignment. 
 
 # Task A: PneumoniaMNIST Binary-classification task
 
