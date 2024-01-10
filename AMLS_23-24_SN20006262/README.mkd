@@ -27,7 +27,7 @@ This folder contains the files for task A. It contains the following files:
 - `keras`: For building and training neural network models.
 - `tensorflow`: Backend for Keras and general ML tasks.
 - `sklearn`: For machine learning models like SVM and Logistic Regression, preprocessing, and evaluation metrics.
-- `skimage`: For image processing tasks.
+
 
 - ## Menu
 1. Logistic Regression
