@@ -30,12 +30,13 @@ This folder contains the files for task A. It contains the following files:
 - `skimage`: For image processing tasks.
 
 - ## Menu
-1. Train a simplified VGG model without data augmentation.
-2. Train a simplified VGG model with data augmentation.
-3. Use Pre-trained VGG model without data augmentation.
-4. Use Pre-trained VGG model with data augmentation.
-5. Option to exit the program.
-
+1. Logistic Regression
+2. SVM without PCA
+3. SVM with PCA
+4. Train Convolutional Neural Network (CNN)
+5. Use Pre-Trained Convolutional Neural Network (CNN)
+6. Exit program
+   
 # Folder B: PathMNIST Multi-classification task
 ## Description
 This folder contains the files for task A. It contains the following files:
@@ -54,15 +55,15 @@ This folder contains the files for task A. It contains the following files:
 - `sklearn`: For preprocessing and evaluation metrics.
 
 - ## Menu
-1. Train a simplified VGG model without data augmentation.
-2. Train a simplified VGG model with data augmentation.
-3. Use Pre-trained VGG model without data augmentation.
-4. Use Pre-trained VGG model with data augmentation.
-5. Option to exit the program.
+1. Train simplified VGG without Data Augmentation
+2. Train simplified VGG with Data Augmentation
+3. Use Pre-Trained simplified VGG without Data Augmentation
+4. Use Pre-Trained simplified VGG with Data Augmentation
+5. Exit program
 
 ## How to Run
 1. Ensure all the required packages are installed.
-2. Run `main.py` and specify which task you want to execute; for example the command `python main.py A` starts the menu to run task A and `python main.py B` starts the menu to run task B.
+2. Run `main.py` and specify which task you want to execute; for example the command `python main.py A` starts the menu to run task A and `python main.py B` starts the menu to run task B. For the code to work, the arguments `A` in `python main.py A` and  `B` in `python main.py B` must be uppercase.
 3. Follow the on-screen prompts to eather use pre-trained models or train th models on your own machine for analyzing the PneumoniaMNIST and PathMNIST dataset.
 
 
