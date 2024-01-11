@@ -1,4 +1,3 @@
-
 # Data processing and visualization
 import numpy as np
 import seaborn as sns
@@ -20,6 +19,30 @@ from keras.regularizers import l2
 # Metrics and TensorFlow
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, classification_report
 import tensorflow as tf
+
+####Focal Loss
+def focal_loss(gamma=2., alpha=4.):
+    gamma = float(gamma)
+    alpha = float(alpha)
+    def focal_loss_fixed(y_true, y_pred):
+        """Focal loss for multi-classification
+        FL(p_t)=-alpha*(1-p_t)^gamma*log(p_t)
+        """
+        epsilon = 1.e-9
+        y_true = tf.convert_to_tensor(y_true, tf.float32)
+        y_pred = tf.clip_by_value(y_pred, epsilon, 1. - epsilon)
+        
+        # Calculate cross entropy
+        cross_entropy = -y_true * tf.math.log(y_pred)
+        weight = alpha * y_true * tf.math.pow((1 - y_pred), gamma)
+        
+        # Calculate focal loss
+        loss = weight * cross_entropy
+        
+        # Sum the losses in mini_batch
+        loss = tf.reduce_sum(loss, axis=1)
+        return tf.reduce_mean(loss)
+    return focal_loss_fixed
 
 def load_data_pathmnist():
     path = r"Datasets\pathmnist.npz"
@@ -56,13 +79,11 @@ def print_class_label_descriptions(class_label_names):
 
 
 def plot_class_distribution_pathmnist(y_train, y_val, y_test):
-
     print_class_label_descriptions(class_label_names)
     fig, axes = plt.subplots(1, 3, figsize=(12, 5), sharey=True)
     datasets = [y_train, y_val, y_test]
     titles = ['Training Set', 'Validation Set', 'Test Set']
     colors = ['skyblue', 'salmon', 'palegreen']  
-
     for i, (dataset, title, color) in enumerate(zip(datasets, titles, colors)):
         classes, counts = np.unique(dataset, return_counts=True)
         axes[i].bar(classes, counts, color=color)
@@ -70,15 +91,12 @@ def plot_class_distribution_pathmnist(y_train, y_val, y_test):
         axes[i].set_ylabel('Number of Images')
         axes[i].set_xticks(classes)
         axes[i].set_title(f"{title} (n={len(dataset)})")  # Show the number of samples in the title
-
     plt.tight_layout()
     plt.show()
 
 
 def show_sample_images(x_data, y_data, class_label_names, num_samples_per_class=3, num_classes=9):
-   
     fig, axes = plt.subplots(num_classes, num_samples_per_class, figsize=(15, 10))
-
     for class_label in range(num_classes):
         class_indices = np.where(y_data == class_label)[0]
         sampled_indices = np.random.choice(class_indices, num_samples_per_class, replace=False)
@@ -92,7 +110,7 @@ def show_sample_images(x_data, y_data, class_label_names, num_samples_per_class=
     plt.tight_layout()
     plt.show()
 
-############################################VGG#####################################################
+####VGG
 
 def preprocess_data(x_train, y_train, x_val, y_val):
     # Normalize images
@@ -103,36 +121,9 @@ def preprocess_data(x_train, y_train, x_val, y_val):
     y_train_onehot = to_categorical(y_train, num_classes=9)
     y_val_onehot = to_categorical(y_val, num_classes=9)
 
-
     return x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot
 
-
-
-####VGG model
-
-# def create_vgg(input_shape, hidden_units, output_shape):
-#     model = Sequential()
     
-#     # Conv Block 1
-#     model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same', input_shape=input_shape))
-#     model.add(ReLU())
-#     model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
-#     model.add(ReLU())
-#     model.add(MaxPooling2D(pool_size=2))
-    
-#     # Conv Block 2
-#     model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
-#     model.add(ReLU())
-#     model.add(Conv2D(hidden_units, kernel_size=3, strides=1, padding='same'))
-#     model.add(ReLU())
-#     model.add(MaxPooling2D(pool_size=2))
-
-#     # Classifier
-#     model.add(Flatten())
-#     model.add(Dense(output_shape, activation='softmax'))
-
-#     return model
-
 def create_vgg(input_shape, hidden_units, output_shape):
     model = Sequential()
 
@@ -154,17 +145,16 @@ def create_vgg(input_shape, hidden_units, output_shape):
 
     # Classifier
     model.add(Flatten())
-    #model.add(Dense(128, activation='relu'))
     model.add(Dense(output_shape, activation='softmax'))
 
     return model
 
 
-def train_model_vgg(model, x_train, y_train, x_val, y_val, learning_rate=0.0001, momentum=0.9, epochs=50, batch_size=256, patience=5, model_path='B/vgg_no_aug.h5'):
+def train_model_vgg_cross(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='B/vgg_no_aug_crossentropy.h5'):
     x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
     
     # Compile the model
-    model.compile(optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
+    model.compile(optimizer=Adam(learning_rate=learning_rate),
                   loss=CategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
 
@@ -184,8 +174,9 @@ def train_model_vgg(model, x_train, y_train, x_val, y_val, learning_rate=0.0001,
 
 from keras.preprocessing.image import ImageDataGenerator
 
-def train_model_vgg_with_augmentation(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='B/vgg_with_aug.h5'):
+def train_model_vgg_with_augmentation_cross(model, x_train, y_train, x_val, y_val, learning_rate=0.001,  epochs=50, batch_size=128, patience=5, model_path='B/vgg_with_aug_crossentropy.h5'):
     x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
+    custom_focal_loss = focal_loss(gamma=2., alpha=4.)
 
     # Define the data augmentation
     train_datagen = ImageDataGenerator(
@@ -197,20 +188,17 @@ def train_model_vgg_with_augmentation(model, x_train, y_train, x_val, y_val, lea
         horizontal_flip=True,
         fill_mode='nearest'
     )
-
     # Create a training data generator
     train_generator = train_datagen.flow(x_train, y_train_onehot, batch_size=batch_size)
-
     # Compile the model
-    model.compile(optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
+    model.compile(optimizer=Adam(learning_rate=learning_rate),
                   loss=CategoricalCrossentropy(from_logits=False),
+                  #loss=custom_focal_loss,
                   metrics=['accuracy'])
-
     # Callbacks
     early_stopping = EarlyStopping(monitor='val_loss', patience=patience, restore_best_weights=True)
     model_checkpoint = ModelCheckpoint(filepath=model_path, save_best_only=True, monitor='val_loss', mode='min')
     callbacks_list = [model_checkpoint, early_stopping]
-
     # Training the model
     history = model.fit(
         train_generator,
@@ -219,38 +207,15 @@ def train_model_vgg_with_augmentation(model, x_train, y_train, x_val, y_val, lea
         validation_data=(x_val, y_val_onehot),
         callbacks=callbacks_list
     )
-    
     return history
 
-####Focal Loss
-def focal_loss(gamma=2., alpha=4.):
-    gamma = float(gamma)
-    alpha = float(alpha)
-    def focal_loss_fixed(y_true, y_pred):
-        """Focal loss for multi-classification
-        FL(p_t)=-alpha*(1-p_t)^gamma*log(p_t)
-        """
-        epsilon = 1.e-9
-        y_true = tf.convert_to_tensor(y_true, tf.float32)
-        y_pred = tf.clip_by_value(y_pred, epsilon, 1. - epsilon)
-        
-        # Calculate cross entropy
-        cross_entropy = -y_true * tf.math.log(y_pred)
-        weight = alpha * y_true * tf.math.pow((1 - y_pred), gamma)
-        
-        # Calculate focal loss
-        loss = weight * cross_entropy
-        
-        # Sum the losses in mini_batch
-        loss = tf.reduce_sum(loss, axis=1)
-        return tf.reduce_mean(loss)
-    return focal_loss_fixed
 
-def train_model(model, x_train, y_train, x_val, y_val, learning_rate=0.0001, momentum=0.9, epochs=50, batch_size=256, patience=5, model_path='./tinyvgg.h5'):
-    x_train, y_train, x_val, y_val = preprocess_data(x_train, y_train, x_val, y_val)
+def train_model_vgg_focal(model, x_train, y_train, x_val, y_val, learning_rate=0.001, epochs=50, batch_size=128, patience=5, model_path= 'B/vgg_no_aug_focal_loss.h5'):
+    x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
     custom_focal_loss = focal_loss(gamma=2., alpha=4.)
-    model.compile(optimizer=SGD(learning_rate=learning_rate, momentum=momentum),
+    model.compile(optimizer=Adam(learning_rate=learning_rate),
                   loss=custom_focal_loss,
+                  #loss=CategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
 
     # Callbacks
@@ -259,12 +224,47 @@ def train_model(model, x_train, y_train, x_val, y_val, learning_rate=0.0001, mom
     callbacks_list = [model_checkpoint, early_stopping]
 
     # Training the model
-    history = model.fit(x_train, y_train,
+    history = model.fit(x_train, y_train_onehot,
                         epochs=epochs,
                         batch_size=batch_size,
-                        validation_data=(x_val, y_val),
+                        validation_data=(x_val, y_val_onehot),
                         callbacks=callbacks_list)
-    
+    return history
+
+def train_model_vgg_with_augmentation_focal(model, x_train, y_train, x_val, y_val, learning_rate=0.001,  epochs=50, batch_size=128, patience=10, model_path='B/vgg_with_aug_focal_loss.h5'):
+    x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
+    custom_focal_loss = focal_loss(gamma=2., alpha=4.)
+
+    # Define the data augmentation
+    train_datagen = ImageDataGenerator(
+        rotation_range=10,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True,
+        fill_mode='nearest'
+    )
+    # Create a training data generator
+    train_generator = train_datagen.flow(x_train, y_train_onehot, batch_size=batch_size)
+
+    # Compile the model
+    model.compile(optimizer=Adam(learning_rate=learning_rate),
+                  #loss=CategoricalCrossentropy(from_logits=False),
+                  loss=custom_focal_loss,
+                  metrics=['accuracy'])
+    # Callbacks
+    early_stopping = EarlyStopping(monitor='val_loss', patience=patience, restore_best_weights=True)
+    model_checkpoint = ModelCheckpoint(filepath=model_path, save_best_only=True, monitor='val_loss', mode='min')
+    callbacks_list = [model_checkpoint, early_stopping]
+    # Training the model
+    history = model.fit(
+        train_generator,
+        epochs=epochs,
+        steps_per_epoch=len(x_train) // batch_size,  # Number of steps per epoch
+        validation_data=(x_val, y_val_onehot),
+        callbacks=callbacks_list
+    )
     return history
 
 
@@ -288,7 +288,8 @@ def plot_training_history(history):
 def evaluate_and_visualize_model(model_path, x_test, y_test):
     x_test = x_test.astype('float32') / 255
     y_test_one_hot = to_categorical(y_test, num_classes=9)  # One-hot encode y_test for model evaluation
-    model = load_model(model_path)
+    focal_loss_fixed = focal_loss()
+    model = load_model(model_path, custom_objects={'focal_loss_fixed': focal_loss_fixed})
 
     # Evaluate the model on test data
     loss, accuracy = model.evaluate(x_test, y_test_one_hot)
@@ -321,16 +322,5 @@ def evaluate_and_visualize_model(model_path, x_test, y_test):
     print("\nClassification Report:\n")
     print(classification_report(true_classes, predicted_classes, target_names=class_label_names.values()))
 
-    # Bar plot for accuracy, precision, and recall
-    metrics = ['Accuracy', 'Precision', 'Recall']
-    values = [accuracy, precision, recall]
-    colors = ['blue', 'green', 'orange']
-    plt.figure(figsize=(8, 5))
-    plt.bar(metrics, values, color=colors)
-    plt.xlabel('Metrics')
-    plt.ylabel('Values')
-    plt.title('Model Evaluation Metrics')
-    plt.ylim(0, 1)
-    plt.show()
 
 

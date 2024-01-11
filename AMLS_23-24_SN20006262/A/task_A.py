@@ -27,28 +27,36 @@ def run_task_A():
 
         if option == 1:
             # Train new Logistic Regression model
-            analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test, x_train, n_channels=1, length=20)
+            analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test)
             pneumoniaLogRegrPredict(x_train, y_train, x_val, y_val, x_test, y_test)
         elif option == 2:
             # Train new SVM models without PCA
-            analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test, x_train, n_channels=1, length=20)
-            models, scalers = train_and_evaluate_svms(x_train, y_train, x_val, y_val, x_test, y_test)
+            analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test)
+            models, scalers = train_and_evaluate_svms(x_train, y_train, x_val, y_val, x_test, y_test,
+                                          C_linear=1.0, C_rbf=2, gamma_rbf='scale', 
+                                          C_poly=1.0, degree_poly=4, 
+                                          C_sigmoid=0.5, tol=1e-3, max_iter=-1)
+            
             plot_roc_curves(models, scalers, x_test, y_test)
         elif option == 3:
             # Train new SVM models with PCA
-            analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test, x_train, n_channels=1, length=20)
-            models, scalers, pcas = train_and_evaluate_svms_pca(x_train, y_train, x_val, y_val, x_test, y_test, n_components=0.95)
+            analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test)
+            models, scalers, pcas = train_and_evaluate_svms_pca(x_train, y_train, x_val, y_val, x_test, y_test, n_components=0.95,
+                                                    C_linear=1.0, C_rbf=2.0, gamma_rbf='scale', 
+                                                    C_poly=1.0, degree_poly=4, 
+                                                    C_sigmoid=0.5, tol=1e-3, max_iter=-1)
+
             plot_roc_curves_pca(models, scalers, pcas, x_test, y_test)
         elif option == 4:
             # Train new CNN model
-            analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test, x_train, n_channels=1, length=20)
+            analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test)
             trained_model, history = train_and_save_cnn(x_train, y_train, x_val, y_val, x_test, y_test)
             plot_training_history(history)
             pneumoniaCNNPredict(x_test, y_test)
         elif option == 5:
             # Use pre-trained CNN model
             if os.path.exists('A/pretrained_model.h5'):
-                analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test, x_train, n_channels=1, length=20)
+                analyze_and_visualize_data(x_train, y_train, x_val, y_val, x_test, y_test)
                 pneumoniaCNNPredict(x_test, y_test)
             else:
                 print("Pre-trained model not found. Please train a model first.")

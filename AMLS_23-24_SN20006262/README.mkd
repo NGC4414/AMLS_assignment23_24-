@@ -1,24 +1,29 @@
 This Github page contains the code for the 2023-2024 AMLS assignment. The assignment requres to classify two medical images datasets, PneumoniaMNIST (binary classification) and PathMNIST(multi-class classification).
 
 The code is organized as follows:
-
--`AMLS_23-24_SN20006262 folder` : contains all the code.
+-`AMLS_23-24_SN20006262`
   - `Folder A` : contains the code to execute task A
   - `Folder B` : contains the code to execute task B
-  - `Datasets`: this folder is basically empty (should be filled with PathMNIST.npz and PneumoniaMNIST.npz files), however it contains a readme file to explain how to use the Datasets folder as GitHub does not allow the upload of empty folders. 
-  - `main.py`: file that handles teh execution of the code.
+  - `Datasets`: empty (should be filled with PathMNIST.npz and PneumoniaMNIST.npz files)
+  - `main.py`: file that handles teh execution of the code
   - `README.mkd`: this file.
-   
-# Main.py
-This file is the main executing file. The file imports the sys library to work with arguments.
 
-# Folder A: PneumoniaMNIST Binary-classification task
+
+# Task A: PneumoniaMNIST Binary-classification task
+
 ## Description
-This folder contains the files for task A. It contains the following files:
-- `train_and_test_A.py`: file that contains the functions used to load the data, train and test the models.
-- `task_A.py`: file used to execute train_and_test_A.py
-- `pretrained_model.h5`: pretrained CNN model
-- `__init__.py` : empty file which helps when using relative paths as this code needs to be run in different computers
+This project focuses on analyzing the PneumoniaMNIST dataset using various machine learning techniques, including Logistic Regression, Support Vector Machines (SVM), and Convolutional Neural Networks (CNN). The project aims to automate the diagnosis of pneumonia from chest X-ray images. 
+
+## File Structure
+- `load_data_pneumonia.py`: Contains the function to load the PneumoniaMNIST dataset.
+- `visualization.py`: Includes functions for visualizing images and class distributions in the dataset.
+- `logistic_regression.py`: Implements Logistic Regression for the dataset.
+- `svm_models.py`: Contains functions to train and evaluate SVM models with different kernels.
+- `svm_pca.py`: SVM models integrated with PCA for dimensionality reduction.
+- `cnn_model.py`: Defines, trains, and saves a CNN model for the dataset.
+- `evaluation_metrics.py`: Includes functions to plot ROC curves, confusion matrices, and training history.
+- `predict.py`: Functions to make predictions using trained Logistic Regression, SVM, and CNN models.
+- `main.py`: Main script to run the project, offering a menu to choose different models and tasks.
 
 ## Packages Required
 - `numpy`: For numerical computations.
@@ -27,24 +32,25 @@ This folder contains the files for task A. It contains the following files:
 - `keras`: For building and training neural network models.
 - `tensorflow`: Backend for Keras and general ML tasks.
 - `sklearn`: For machine learning models like SVM and Logistic Regression, preprocessing, and evaluation metrics.
+- `skimage`: For image processing tasks.
 
+## How to Run
+1. Ensure all required packages are installed.
+2. Run `main.py` to start the program and follow the on-screen prompts to select different analysis tasks.
 
-- ## Menu
-1. Logistic Regression
-2. SVM without PCA
-3. SVM with PCA
-4. Train Convolutional Neural Network (CNN)
-5. Use Pre-Trained Convolutional Neural Network (CNN)
-6. Exit program
-   
-# Folder B: PathMNIST Multi-classification task
+# Task B: PathMNIST Multi-classification task
+
 ## Description
-This folder contains the files for task A. It contains the following files:
-- `train_and_test_B.py`: file that contains the functions used to load the data, train and test the models.
-- `task_B.py`: file used to execute train_and_test_B.py
-- `vgg_no_aug.h5`: pretrained VGG model
-- `vgg_with_aug.h5`: pretrained VGG model
-- `__init__.py` : empty file which helps when using relative paths as this code needs to be run in different computers
+This project is dedicated to the analysis of the PathMNIST dataset, a collection of histopathological images, using various deep learning techniques. The primary focus is on building and evaluating a simplified version of the VGG network, both with and without data augmentation.
+
+## File Structure
+- `load_data_pathmnist.py`: Loads the PathMNIST dataset.
+- `visualization.py`: Contains functions for visualizing class distributions and sample images from the dataset.
+- `vgg_model.py`: Defines the architecture for a simplified VGG network.
+- `training.py`: Includes functions to train the VGG model with and without data augmentation.
+- `evaluation.py`: Functions for evaluating the trained models and visualizing the results.
+- `focal_loss.py`: Implements a custom focal loss function for model training.
+- `main.py`: Main script to run the project, allowing the user to select different tasks such as training or using pre-trained models.
 
 ## Packages Required
 - `numpy`: For numerical computations.
@@ -54,18 +60,16 @@ This folder contains the files for task A. It contains the following files:
 - `tensorflow`: Backend for Keras and general ML tasks.
 - `sklearn`: For preprocessing and evaluation metrics.
 
-- ## Menu
-1. Train simplified VGG without Data Augmentation
-2. Train simplified VGG with Data Augmentation
-3. Use Pre-Trained simplified VGG without Data Augmentation
-4. Use Pre-Trained simplified VGG with Data Augmentation
-5. Exit program
-
 ## How to Run
 1. Ensure all the required packages are installed.
-2. Run `main.py` and specify which task you want to execute; for example the command `python main.py A` starts the menu to run task A and `python main.py B` starts the menu to run task B. For the code to work, the arguments `A` in `python main.py A` and  `B` in `python main.py B` must be uppercase.
-3. Follow the on-screen prompts to eather use pre-trained models or train th models on your own machine for analyzing the PneumoniaMNIST and PathMNIST dataset.
+2. Run `main.py` to start the program.
+3. Follow the on-screen prompts to train new models or use pre-trained models for analyzing the PathMNIST dataset.
 
+## Tasks
+- Train a simplified VGG model without data augmentation.
+- Train a simplified VGG model with data augmentation.
+- Evaluate and visualize the performance of trained models.
+- Option to exit the program.
 
-Please note that training models require the `vgg_no_aug.h5` and `vgg_with_aug.h5` files to be present in the `B` directory and the `pretrained_model.h5` file to be present in the `A` for using pre-trained models.
+Please note that training models require the `vgg_no_aug.h5` and `vgg_with_aug.h5` files to be present in the `B` directory for using pre-trained models.
 
