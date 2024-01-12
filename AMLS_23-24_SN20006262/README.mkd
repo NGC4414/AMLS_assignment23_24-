@@ -33,7 +33,9 @@ Select models for Task A:
 - `seaborn`: For advanced data visualisation.
 - `keras`: For building and training neural network models.
 - `tensorflow`: Backend for Keras and general ML tasks.
-- `sklearn`: For machine learning models like SVM and Logistic Regression, preprocessing, and evaluation metrics.
+- `scikit-learn`: For machine learning models like SVM and Logistic Regression, preprocessing, and evaluation metrics.
+- `sys`: For running the main and task_B.py
+- `os`: For running the main and task_B.py
 
 
 
@@ -59,11 +61,13 @@ Select models for Task B:
 
 ## Packages Required
 - `numpy`: For numerical computations.
-- `seaborn`: For advanced data visualization.
+- `seaborn`: For advanced data visualisation.
 - `matplotlib`: For plotting graphs and images.
 - `keras`: For building and training neural network models.
 - `tensorflow`: Backend for Keras and general ML tasks.
-- `sklearn`: For preprocessing and evaluation metrics.
+- `scikit-learn`: For preprocessing and evaluation metrics.
+- `sys`: For running the main and task_B.py
+- `os`: For running the main and task_B.py
 
 
 
