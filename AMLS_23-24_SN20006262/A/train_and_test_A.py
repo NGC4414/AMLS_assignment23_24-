@@ -86,7 +86,7 @@ def pneumoniaLogRegrPredict(x_train, y_train, x_val, y_val, x_test, y_test):
     y_val_flatten = y_val.ravel()
     y_test_flatten = y_test.ravel()
 
-    # Standardize features
+    # Standardise features
     scaler = StandardScaler()
     train_images_scaled = scaler.fit_transform(train_images_flatten)
     val_images_scaled = scaler.transform(val_images_flatten)
@@ -95,11 +95,11 @@ def pneumoniaLogRegrPredict(x_train, y_train, x_val, y_val, x_test, y_test):
     # Train the model on the training data
     model.fit(train_images_scaled, y_train_flatten)
 
-    # Validate the model on the validation data
+    # Validate the model
     val_accuracy = model.score(val_images_scaled, y_val_flatten)
     print(f'Validation Accuracy: {val_accuracy}')
 
-    # Test the model on the test data
+    # Test the model
     test_accuracy = model.score(test_images_scaled, y_test_flatten)
     print(f'Test Accuracy: {test_accuracy}')
 
@@ -137,18 +137,15 @@ def plot_roc_curves(models, scalers, x_test, y_test):
     for kernel in models:
         model = models[kernel]
         scaler = scalers[kernel]
-
-        # Scale test data
         x_test_scaled = scaler.transform(x_test.reshape((x_test.shape[0], -1)))
 
         # Compute predicted probabilities
         y_pred_prob = model.predict_proba(x_test_scaled)[:, 1]
 
-        # Compute ROC curve and ROC area
+        # ROC curve and ROC area
         fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
         roc_auc = auc(fpr, tpr)
 
-        # Plot
         plt.plot(fpr, tpr, label=f'ROC curve (kernel={kernel}, area = {roc_auc:.2f})')
 
     plt.plot([0, 1], [0, 1], 'k--')  
@@ -290,7 +287,7 @@ def plot_roc_curves_pca(models, scalers, pcas, x_test, y_test):
     for kernel in models:
         model = models[kernel]
         scaler = scalers[kernel]
-        pca = pcas[kernel]  # Retrieve the corresponding PCA object
+        pca = pcas[kernel]
 
         # Scale and then apply PCA transformation to test data
         x_test_scaled = scaler.transform(x_test.reshape((x_test.shape[0], -1)))
@@ -299,11 +296,10 @@ def plot_roc_curves_pca(models, scalers, pcas, x_test, y_test):
         # Compute predicted probabilities
         y_pred_prob = model.predict_proba(x_test_pca)[:, 1]
 
-        # Compute ROC curve and ROC area
+        # ROC curve and ROC area
         fpr, tpr, _ = roc_curve(y_test, y_pred_prob)
         roc_auc = auc(fpr, tpr)
 
-        # Plot
         plt.plot(fpr, tpr, label=f'ROC curve (kernel={kernel}, area = {roc_auc:.2f})')
 
     plt.plot([0, 1], [0, 1], 'k--')  
@@ -313,7 +309,7 @@ def plot_roc_curves_pca(models, scalers, pcas, x_test, y_test):
     plt.legend(loc="lower right")
     plt.show()
 
-    
+   
 
 ####CNN
 def preprocess_pneumoniamnist(x_train, x_val, x_test, y_train, y_test, y_val, num_classes):
@@ -335,7 +331,7 @@ def preprocess_pneumoniamnist(x_train, x_val, x_test, y_train, y_test, y_val, nu
     print('x_test shape:',x_test.shape)
     print('x_val shape:',x_val.shape)
 
-    ## One-hot encode labels
+    # One-hot encode labels
     y_train_onehot = to_categorical(y_train)
     y_test_onehot = to_categorical(y_test)
     y_val_onehot = to_categorical(y_val)
@@ -361,7 +357,7 @@ def train_and_save_cnn(x_train, y_train, x_val, y_val, x_test, y_test):
     model = Model(inputs=[input], outputs=[output])
     print(model.summary())
 
-    opt = Adam(learning_rate=0.0001)
+    opt = Adam(learning_rate=0.001)
     model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
 
     # Early stopping callback
@@ -377,9 +373,47 @@ def train_and_save_cnn(x_train, y_train, x_val, y_val, x_test, y_test):
     model.save('A/pretrained_model.h5')
     return model, cnn_history
 
+# getting diagram
+#((x_train, y_train), (x_val, y_val), (x_test, y_test)) = load_data_pneumonia()
+
+# def create_custom_cnn(input_shape, num_classes, x_train, y_train, x_val, y_val, x_test, y_test):
+
+#     x_train, x_val, x_test, y_train_onehot, y_val_onehot, y_test_onehot = preprocess_pneumoniamnist(x_train, x_val, x_test, y_train, y_test, y_val, num_classes=2)
+
+#     # Define the input layer
+#     input = Input(shape=x_train.shape[1:])
+#     x = Conv2D(32, (5, 5), activation='relu', padding='same')(input)
+#     x = Conv2D(32, (5, 5), activation='relu', padding='same')(x)
+#     x = MaxPooling2D(pool_size=(2, 2))(x)
+#     x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+#     x = Conv2D(64, (3, 3), activation='relu', padding='same', name='last_conv_layer')(x)
+#     x = GlobalAveragePooling2D(name='avg_pool')(x)
+#     output = Dense(2, activation='softmax', name='predictions')(x)
+    
+
+#     # Create the model
+#     model = Model(inputs=[input], outputs=[output])
+
+#     return model
+
+
+# input_shape = (28, 28, 3) 
+# num_classes = 2 
+# model = create_custom_cnn(input_shape, num_classes, x_train, y_train, x_val, y_val, x_test, y_test )
+
+# tf.keras.utils.plot_model(
+#     model,
+#     to_file='model_plot_CNN_A.png',
+#     show_shapes=True,
+#     show_layer_names=True,
+#     rankdir='TB',
+#     expand_nested=True,
+#     dpi=96,
+# )
+
     
 def plot_training_history(history):
-    # Plotting the training history
+    
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 2, 1)
     plt.plot(history.history['loss'], label='Train Loss')
@@ -434,13 +468,11 @@ def pneumoniaCNNPredict(x_test, y_test):
     plt.legend(loc="lower right")
     plt.show()
 
-    # Print the predictions, evaluation metrics, and AUC
     print("Predictions:", predicted_classes)
     print("Accuracy on test set:", accuracy)
     print("Recall on test set:", recall)
     print("AUC on test set:", roc_auc)
 
-    # Create a confusion matrix
     cm = confusion_matrix(y_test, predicted_classes)
 
     # Plot the confusion matrix

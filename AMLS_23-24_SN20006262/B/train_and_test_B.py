@@ -20,7 +20,7 @@ from keras.regularizers import l2
 from sklearn.metrics import confusion_matrix, precision_score, recall_score, classification_report
 import tensorflow as tf
 
-####Focal Loss
+####Focal Loss function from https://medium.com/@sarahpileroudi/understanding-focal-loss-caed081554e5
 def focal_loss(gamma=2., alpha=4.):
     gamma = float(gamma)
     alpha = float(alpha)
@@ -44,6 +44,7 @@ def focal_loss(gamma=2., alpha=4.):
         return tf.reduce_mean(loss)
     return focal_loss_fixed
 
+
 def load_data_pathmnist():
     path = r"Datasets\pathmnist.npz"
     with np.load(path) as pathmnistmnist:
@@ -58,7 +59,7 @@ def load_data_pathmnist():
 
 ((x_train, y_train), (x_val, y_val), (x_test, y_test)) = load_data_pathmnist()
 
-# Dictionary that maps class labels to their names
+# Dictionary that mapping class labels to their names
 class_label_names = {
     '0': 'adipose',
     '1': 'background',
@@ -90,7 +91,7 @@ def plot_class_distribution_pathmnist(y_train, y_val, y_test):
         axes[i].set_xlabel('Class')
         axes[i].set_ylabel('Number of Images')
         axes[i].set_xticks(classes)
-        axes[i].set_title(f"{title} (n={len(dataset)})")  # Show the number of samples in the title
+        axes[i].set_title(f"{title} (n={len(dataset)})") 
     plt.tight_layout()
     plt.show()
 
@@ -102,7 +103,7 @@ def show_sample_images(x_data, y_data, class_label_names, num_samples_per_class=
         sampled_indices = np.random.choice(class_indices, num_samples_per_class, replace=False)
 
         for sample_idx, data_idx in enumerate(sampled_indices):
-            image = x_data[data_idx].reshape(28, 28, 3)  # Assuming RGB images
+            image = x_data[data_idx].reshape(28, 28, 3)  # RGB
             axes[class_label, sample_idx].imshow(image)
             axes[class_label, sample_idx].axis('off')
             axes[class_label, sample_idx].set_title(class_label_names[str(class_label)])
@@ -110,10 +111,10 @@ def show_sample_images(x_data, y_data, class_label_names, num_samples_per_class=
     plt.tight_layout()
     plt.show()
 
-####VGG
 
+####VGG
 def preprocess_data(x_train, y_train, x_val, y_val):
-    # Normalize images
+    # Normalise images
     x_train = x_train.astype('float32') / 255
     x_val = x_val.astype('float32') / 255
 
@@ -150,6 +151,47 @@ def create_vgg(input_shape, hidden_units, output_shape):
     return model
 
 
+# getting diagram
+# def create_simplified_vgg(input_shape, output_shape):
+#     model = Sequential()
+
+#     # Conv Block 1
+#     model.add(Conv2D(32, kernel_size=3, strides=1, padding='same', input_shape=input_shape))
+#     model.add(ReLU())
+#     model.add(Conv2D(32, kernel_size=3, strides=1, padding='same'))
+#     model.add(ReLU())
+#     model.add(MaxPooling2D(pool_size=2))
+
+#     # Conv Block 2
+#     model.add(Conv2D(128, kernel_size=3, strides=1, padding='same'))
+#     model.add(ReLU())
+#     model.add(Conv2D(128, kernel_size=3, strides=1, padding='same'))
+#     model.add(ReLU())
+#     model.add(MaxPooling2D(pool_size=2))
+#     model.add(Dropout(0.25))
+
+#     # Classifier
+#     model.add(Flatten())
+#     model.add(Dense(output_shape, activation='softmax'))
+
+#     return model
+
+
+# input_shape = (28, 28, 3) 
+# output_shape = 9 
+# model = create_simplified_vgg(input_shape, output_shape)
+
+# tf.keras.utils.plot_model(
+#     model,
+#     to_file='simplified_vgg_model_plot.png',
+#     show_shapes=True,
+#     show_layer_names=True,
+#     rankdir='TB',
+#     expand_nested=True,
+#     dpi=96,
+# )
+
+
 def train_model_vgg_cross(model, x_train, y_train, x_val, y_val, learning_rate=0.001, momentum=0.9, epochs=50, batch_size=128, patience=5, model_path='B/vgg_no_aug_crossentropy.h5'):
     x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
     
@@ -172,13 +214,12 @@ def train_model_vgg_cross(model, x_train, y_train, x_val, y_val, learning_rate=0
   
     return history
 
-from keras.preprocessing.image import ImageDataGenerator
 
 def train_model_vgg_with_augmentation_cross(model, x_train, y_train, x_val, y_val, learning_rate=0.001,  epochs=50, batch_size=128, patience=5, model_path='B/vgg_with_aug_crossentropy.h5'):
     x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
     custom_focal_loss = focal_loss(gamma=2., alpha=4.)
 
-    # Define the data augmentation
+    # data augmentation
     train_datagen = ImageDataGenerator(
         rotation_range=10,
         width_shift_range=0.2,
@@ -188,7 +229,8 @@ def train_model_vgg_with_augmentation_cross(model, x_train, y_train, x_val, y_va
         horizontal_flip=True,
         fill_mode='nearest'
     )
-    # Create a training data generator
+
+    # training data generator
     train_generator = train_datagen.flow(x_train, y_train_onehot, batch_size=batch_size)
     # Compile the model
     model.compile(optimizer=Adam(learning_rate=learning_rate),
@@ -199,7 +241,8 @@ def train_model_vgg_with_augmentation_cross(model, x_train, y_train, x_val, y_va
     early_stopping = EarlyStopping(monitor='val_loss', patience=patience, restore_best_weights=True)
     model_checkpoint = ModelCheckpoint(filepath=model_path, save_best_only=True, monitor='val_loss', mode='min')
     callbacks_list = [model_checkpoint, early_stopping]
-    # Training the model
+
+    # Fitting the model
     history = model.fit(
         train_generator,
         epochs=epochs,
@@ -231,7 +274,7 @@ def train_model_vgg_focal(model, x_train, y_train, x_val, y_val, learning_rate=0
                         callbacks=callbacks_list)
     return history
 
-def train_model_vgg_with_augmentation_focal(model, x_train, y_train, x_val, y_val, learning_rate=0.001,  epochs=50, batch_size=128, patience=10, model_path='B/vgg_with_aug_focal_loss.h5'):
+def train_model_vgg_with_augmentation_focal(model, x_train, y_train, x_val, y_val, learning_rate=0.001,  epochs=50, batch_size=128, patience=5, model_path='B/vgg_with_aug_focal_loss.h5'):
     x_train, y_train, x_val, y_val, y_train_onehot, y_val_onehot = preprocess_data(x_train, y_train, x_val, y_val)
     custom_focal_loss = focal_loss(gamma=2., alpha=4.)
 
@@ -267,9 +310,8 @@ def train_model_vgg_with_augmentation_focal(model, x_train, y_train, x_val, y_va
     )
     return history
 
-
 def plot_training_history(history):
-    # Plotting the training history
+    
     plt.figure(figsize=(12, 4))
     plt.subplot(1, 2, 1)
     plt.plot(history.history['loss'], label='Train Loss')
@@ -298,7 +340,7 @@ def evaluate_and_visualize_model(model_path, x_test, y_test):
     # Make predictions
     predictions = model.predict(x_test)
     predicted_classes = np.argmax(predictions, axis=1)
-    true_classes = y_test  # Using non-one-hot encoded y_test for classification report
+    true_classes = y_test  
 
     # Compute and plot the confusion matrix
     cm = confusion_matrix(true_classes, predicted_classes)
@@ -312,13 +354,9 @@ def evaluate_and_visualize_model(model_path, x_test, y_test):
     # Calculate precision and recall
     precision = precision_score(true_classes, predicted_classes, average='macro')
     recall = recall_score(true_classes, predicted_classes, average='macro')
-
-    # Print accuracy, precision, and recall
     print(f"Accuracy: {accuracy:.2f}")
     print(f"Precision: {precision:.2f}")
     print(f"Recall: {recall:.2f}")
-
-    # Print classification report
     print("\nClassification Report:\n")
     print(classification_report(true_classes, predicted_classes, target_names=class_label_names.values()))
 
