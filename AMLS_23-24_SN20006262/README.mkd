@@ -70,7 +70,7 @@ Select models for Task B:
 ## How to Run
 1. Ensure all the required packages are installed.
 2. Download the PneumoniaMNIST.npz and the PathMNIST files from https://zenodo.org/records/6496656 and place them in the 'Datasets' folder.
-3. Run `main.py` to start the program using arguments. To run task A write the `python main.py A` command in the terminal. To run task B write the command `python main.py B` on the terminal. The arguments `A` for `python main.py A` and `B` for `python main.py B` must be uppercase to make the program work.
+3. To run task A write the `python main.py A` command in the terminal. To run task B write the command `python main.py B` on the terminal. The arguments `A` for `python main.py A` and `B` for `python main.py B` must be uppercase to make the program work.
 4. Once the preferred task has been selected, follow the on-screen prompts to train new models or use pre-trained models for both tasks.
 
 
