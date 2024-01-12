@@ -5,7 +5,7 @@ The project folder is organised as follows:
 -`AMLS_23-24_SN20006262`
   - `Folder A` : contains the code to execute task A and the pretrained CNN model `pretrained_model.h5`
   - `Folder B` : contains the code to execute task B and the pretrained CNN models `vgg_no_aug_crossentropy.h5`, `vgg_no_aug_focal_loss.h5`, `vgg_with_aug_crossentropy.h5`,`vgg_with_aug_focal_loss.h5` 
-  - `Datasets`: this folder is basically empty, however it comes with a .gitignore file that allows us to upload the empty folder to GitHub (it should be filled with PathMNIST.npz and PneumoniaMNIST.npz files)
+  - `Datasets`: this folder is basically empty, however it comes with a .gitignore file and readme file that allow us to upload the empty folder to GitHub (it should be filled with PathMNIST.npz and PneumoniaMNIST.npz files)
   - `main.py`: file that handles the execution of the code
   - `README.mkd`: this file.
 
