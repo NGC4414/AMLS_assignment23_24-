@@ -1,6 +1,7 @@
 This Github page contains the code for the 2023-2024 AMLS assignment. The assignment requres to classify two medical images datasets, PneumoniaMNIST (binary classification) and PathMNIST(multi-class classification).
 
 The project folder is organised as follows:
+
 -`AMLS_23-24_SN20006262`
   - `Folder A` : contains the code to execute task A and the pretrained CNN model `pretrained_model.h5`
   - `Folder B` : contains the code to execute task B and the pretrained CNN models `vgg_no_aug_crossentropy.h5`, `vgg_no_aug_focal_loss.h5`, `vgg_with_aug_crossentropy.h5`,`vgg_with_aug_focal_loss.h5` 
