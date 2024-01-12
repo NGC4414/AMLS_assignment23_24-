@@ -35,8 +35,8 @@ Select models for Task A:
 - `keras`: For building and training neural network models.
 - `tensorflow`: Backend for Keras and general ML tasks.
 - `scikit-learn`: For machine learning models like SVM and Logistic Regression, preprocessing, and evaluation metrics.
-- `sys`: For running the main and task_B.py
-- `os`: For running the main and task_B.py
+- `sys`: For running the main.py and task_A.py
+- `os`: For running the main.py and task_A.py
 
 
 
@@ -67,8 +67,8 @@ Select models for Task B:
 - `keras`: For building and training neural network models.
 - `tensorflow`: Backend for Keras and general ML tasks.
 - `scikit-learn`: For preprocessing and evaluation metrics.
-- `sys`: For running the main and task_B.py
-- `os`: For running the main and task_B.py
+- `sys`: For running the main.py and task_B.py
+- `os`: For running the main.py and task_B.py
 
 
 
