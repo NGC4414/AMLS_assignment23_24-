@@ -1,4 +1,4 @@
 This folder should be filled with the PneumoniaMNIST and PathMNIST dataset .npz files, which will be unpacked in the codes in folders A and B.
 
 
-The .npz files can be dowloaded from the Zenodo website: https://zenodo.org/records/6496656
+The .npz files can be downloaded from the Zenodo website: https://zenodo.org/records/6496656
